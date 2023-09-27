@@ -1,0 +1,1 @@
+.beton files from ffcv writer go here.
