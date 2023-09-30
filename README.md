@@ -10,4 +10,4 @@ Roughly 2-2.5x training speedup was observed when using ffcv dataloader over PyT
 Note 1: The plots show the final training run using both training and validation sets together,
 so the validation accuracy/loss curves are meaningless.
 
-Note 2: When training, create './data' and './data/ffcv' as directories to hold original dataset and the ffcv .beton files, respectively.
+Note 2: Run train.py from command line. To run on Google colab, use colab_wrapper.ipynb. This will clone the repo. If running for the first time or changing data splits, change --beton flag to 1. Subsequent runs can use --beton 0 to save time.
