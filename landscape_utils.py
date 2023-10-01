@@ -83,12 +83,11 @@ def reset_theta(model, theta_star):
     return
 
 
-def plot_landscape(model,plot_type='trisurf', indx=-1):
+def plot_landscape(model,plot_type='trisurf', indx=-1, vmin=0.0, vmax=10.0):
     d = model.metrics['visual'][indx]
     alpha_grid,beta_grid = torch.meshgrid(d['alphas'],d['betas'])
     losses = np.nan_to_num(d['losses'], nan=np.Inf)
 
-    vmin,vmax = 0.0,60.0
     losses = np.clip(losses, a_min=vmin, a_max=vmax)
     
     print(f"{vmin=}")
