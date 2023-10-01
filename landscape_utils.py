@@ -83,7 +83,7 @@ def reset_theta(model, theta_star):
     return
 
 
-def plot_landscape(model,plot_type='trisurf', indx=-1, vmin=0.0, vmax=10.0):
+def plot_landscape(model,plot_type='trisurf', indx=-1, vmin=0.0, vmax=10.0, font='black'):
     d = model.metrics['visual'][indx]
     alpha_grid,beta_grid = torch.meshgrid(d['alphas'],d['betas'])
     losses = np.nan_to_num(d['losses'], nan=np.Inf)
@@ -116,5 +116,15 @@ def plot_landscape(model,plot_type='trisurf', indx=-1, vmin=0.0, vmax=10.0):
     
     fig.subplots_adjust(wspace=0.5)    
     fig.colorbar(surf, shrink=0.5, aspect=5)
+    
+    params = {
+        "text.color" : font,
+        "ytick.color" : font,
+        "xtick.color" : font,
+        "axes.labelcolor" : font,
+        "axes.edgecolor" : font
+    }
+    plt.rcParams.update(params)
+    
     plt.show()
     return
