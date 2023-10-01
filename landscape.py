@@ -24,20 +24,26 @@ def main(args):
     model = model.to('cuda:0')
     model.eval()
     conf = model.conf
+    for k,v in conf.items():
+        print(f"{k}:   {v}")
+    print()
 #     conf['USE_FLOAT16'] = False
 
-    # training set
+    # dataset and dataloader
     import dataloading
     from dataloading import write_datasets, get_loader
-    train_loader = get_loader(conf['MEAN'], conf['STD'], split=args.split, BS=conf['BS'], SCALER=4*conf['SCALER'], USE_FLOAT16=False, visualize=True) #conf['USE_FLOAT16']
+    write_datasets(conf['num_classes'], lengths=conf['lengths'], write=True)
+    loader = get_loader(conf['MEAN'], conf['STD'], num_classes=conf['num_classes'],
+                        split='train', BS=conf['BS'], SCALER=conf['SCALER'], NW=2,
+                        USE_FLOAT16=False, visualize=True) #conf['USE_FLOAT16']
     print(f"Batch size is {conf['BS']}x{conf['SCALER']} = {conf['BS']*conf['SCALER']}.")
 
     # Print filter norms
-    from landscape_utils import get_direction, perturb_theta, reset_theta, compare_norms
-    compare_norms(model.metrics['norms'])
+    from landscape_utils import get_direction, perturb_theta, reset_theta #, compare_norms
+    # compare_norms(model.metrics['norms'])
 
     # Generate two random directions in parameter space
-    conf['ignore'] = True
+    conf['ignore'] = True # Ignore batchnorm and bias params
     theta_star = [(p.data,k) for k,p in model.named_parameters()]
     dir1 = get_direction(model, theta_star, conf['ignore'])
     dir2 = get_direction(model, theta_star, conf['ignore'])
@@ -55,7 +61,7 @@ def main(args):
     losses = []
     for pos in tqdm(torch.reshape(coords, (-1,2))):
         perturb_theta(model, theta_star, dir1, dir2, pos)
-        loss,acc = evaluate(model, train_loader, USE_FLOAT16=False) #conf['USE_FLOAT16']
+        loss,acc = evaluate(model, loader, USE_FLOAT16=False) #conf['USE_FLOAT16']
         losses.append(loss)
     losses = np.asarray(losses).reshape(tuple(alpha_grid.shape))
     print(losses.shape)
@@ -69,7 +75,7 @@ def main(args):
     vis_dict = {
         'R':R,
         'steps':steps,
-        'split':args.split, 
+        # 'split':args.split, 
         'alphas':alphas,
         'betas':betas,
         'losses':losses,
@@ -90,6 +96,6 @@ if __name__=='__main__':
     parser.add_argument('--model', type=str, help="Model to visualize.", required=True) # eg. "cifar100_n9_"
     parser.add_argument('--R', default=1.0, type=float, help="Range of values to visualize, ie. alpha,beta in [-R,+R].", required=False)
     parser.add_argument('--steps', default=11, type=int, help="Number of points to evaluate along each direction.", required=False)
-    parser.add_argument('--split', default='train', type=str, help="Data split to use for evaluation.", required=False)
+    # parser.add_argument('--split', default='train', type=str, help="Data split to use for evaluation.", required=False)
     args = parser.parse_args()
     main(args)

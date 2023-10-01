@@ -1,6 +1,9 @@
 import numpy as np
 import torch
 
+import matplotlib.pyplot as plt
+import matplotlib.colors as colors
+from matplotlib import cm
 '''
 parameters() # bottom level, no names
 named_parameters() # bottom level, includes names
@@ -77,4 +80,42 @@ def perturb_theta(model, theta_star, dir1, dir2, pos):
 def reset_theta(model, theta_star):
     for i,(k,p) in enumerate(model.named_parameters()):
         p.data = theta_star[i][0]
+    return
+
+
+def plot_landscape(model,plot_type='trisurf', indx=-1):
+    d = model.metrics['visual'][indx]
+    alpha_grid,beta_grid = torch.meshgrid(d['alphas'],d['betas'])
+    losses = np.nan_to_num(d['losses'], nan=np.Inf)
+
+    vmin,vmax = 0.0,60.0
+    losses = np.clip(losses, a_min=vmin, a_max=vmax)
+    
+    print(f"{vmin=}")
+    print(f"{vmax=}")
+    
+    fig = plt.figure(figsize=(12,4))
+    # Loss landscape
+    if plot_type=='contour':
+        ax = fig.add_subplot(122)
+        surf = ax.contour(alpha_grid, beta_grid, losses, levels=np.linspace(vmin,vmax,21), cmap='magma')        
+    elif plot_type=='trisurf':
+        ax = fig.add_subplot(122,projection='3d')
+        ax.set_zlim(bottom=vmin, top=vmax)
+        surf = ax.plot_trisurf(alpha_grid.flatten(), beta_grid.flatten(), losses.flatten(),
+                               norm=colors.Normalize(vmin,vmax), cmap='magma')
+        ax.set_zlabel(f"{d['split']} loss")    
+    ax.set_title("Loss landscape")
+    ax.set_xlabel('alpha')
+    ax.set_ylabel('beta')
+    # Histogram of loss values collected
+    ax_hist = fig.add_subplot(121)
+    ax_hist.set_title("Histogram of losses")
+    ax_hist.hist(losses.flatten(), bins=20)
+    ax_hist.set_xlabel('Loss value')
+    ax_hist.set_ylabel('Frequency')
+    
+    fig.subplots_adjust(wspace=0.5)    
+    fig.colorbar(surf, shrink=0.5, aspect=5)
+    plt.show()
     return
