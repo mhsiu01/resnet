@@ -17,6 +17,7 @@ Note 3: To train on DSMLP with ffcv, one needs to create a custom Docker contain
 
 ## Loss landscape
 I also implemented "filter normalization" from "Visualizing the Loss Landscape of Neural Nets"(https://arxiv.org/abs/1712.09913). The trained model seems to be in a fairly nice bowl-shaped minima:
-![image](https://github.com/mhsiu01/resnet/assets/78574718/bd3d548d-5578-472f-a27a-20d730dcaab8)
+![image](https://github.com/mhsiu01/resnet/assets/78574718/b14c57ed-0eb2-473a-bd74-84570e6e906a)
+
 
 
